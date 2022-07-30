@@ -11,14 +11,17 @@ import (
 )
 
 type NacosConfigparams struct {
-	NacosNamespace string `mapstructure:"nacos.namespace"`
-	NacosHost      string `mapstructure:"nacos.host"`
-	NacosLogDir    string `mapstructure:"nacos.logDir"`
-	NacosCacheDir  string `mapstructure:"nacos.cacheDir"`
-	NacosLogLevel  string `mapstructure:"nacos.logLevel"`
-	NacosPort      uint64 `mapstructure:"nacos.port"`
-	NacosDataId    string `mapstructure:"nacos.dataId"`
-	NacosGroup     string `mapstructure:"nacos.group"`
+	NacosNamespace   string `mapstructure:"nacos.namespace"`
+	NacosHost        string `mapstructure:"nacos.host"`
+	NacosLogDir      string `mapstructure:"nacos.logDir"`
+	NacosCacheDir    string `mapstructure:"nacos.cacheDir"`
+	NacosLogLevel    string `mapstructure:"nacos.logLevel"`
+	NacosPort        uint64 `mapstructure:"nacos.port"`
+	NacosDataId      string `mapstructure:"nacos.dataId"`
+	NacosGroup       string `mapstructure:"nacos.group"`
+	NacosContextPath string `mapstructure:"nacos.contextPath"`
+	NacosScheme      string `mapstructure:"nacos.scheme"`
+	NacosTimeout     uint64 `mapstructure:"nacos.timeout"`
 }
 
 // InitRemoteConfig 初始化远程配置
@@ -26,7 +29,7 @@ func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 	vl := viper.New()
 	clientConfig := constant.ClientConfig{
 		NamespaceId:         config.NacosNamespace, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
-		TimeoutMs:           5000,
+		TimeoutMs:           config.NacosTimeout,
 		NotLoadCacheAtStart: true,
 		LogDir:              config.NacosLogDir,
 		CacheDir:            config.NacosCacheDir,
@@ -36,9 +39,9 @@ func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 	serverConfigs := []constant.ServerConfig{
 		{
 			IpAddr:      config.NacosHost,
-			ContextPath: "/nacos",
+			ContextPath: config.NacosContextPath,
 			Port:        config.NacosPort,
-			Scheme:      "http",
+			Scheme:      config.NacosScheme,
 		},
 	}
 	client, err := clients.NewConfigClient(vo.NacosClientParam{
