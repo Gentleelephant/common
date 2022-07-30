@@ -12,11 +12,11 @@ import (
 )
 
 type SQLConfig struct {
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Database string `json:"database"`
+	Host     string `json:"host" yaml:"host"`
+	Port     int    `json:"port" yaml:"port"`
+	Username string `json:"username" yaml:"username"`
+	Password string `json:"password" yaml:"password"`
+	Database string `json:"database" yaml:"database"`
 }
 
 func InitDB(config SQLConfig) (*gorm.DB, error) {

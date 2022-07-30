@@ -82,3 +82,15 @@ func parseConfig(viper *viper.Viper, data string) {
 		panic(err)
 	}
 }
+
+// GetConfig 根据配置文件获得配置
+func GetConfig(filePah string, fileType string) (*viper.Viper, error) {
+	vl := viper.New()
+	vl.SetConfigFile(filePah)
+	vl.SetConfigType(fileType)
+	err := vl.ReadInConfig()
+	if err != nil {
+		return nil, err
+	}
+	return vl, nil
+}
