@@ -22,7 +22,7 @@ type NacosConfigparams struct {
 }
 
 // InitRemoteConfig 初始化远程配置
-func InitRemoteConfig(config NacosConfigparams) *viper.Viper {
+func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 	vl := viper.New()
 	clientConfig := constant.ClientConfig{
 		NamespaceId:         config.NacosNamespace, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
@@ -46,7 +46,7 @@ func InitRemoteConfig(config NacosConfigparams) *viper.Viper {
 		ServerConfigs: serverConfigs,
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	// 获取配置
 	remoteConfig, err := client.GetConfig(vo.ConfigParam{
@@ -54,7 +54,7 @@ func InitRemoteConfig(config NacosConfigparams) *viper.Viper {
 		Group:  config.NacosGroup,
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	// 解析配置
 	parseConfig(vl, remoteConfig)
@@ -67,10 +67,10 @@ func InitRemoteConfig(config NacosConfigparams) *viper.Viper {
 		},
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	fmt.Println(remoteConfig)
-	return vl
+	return vl, nil
 }
 
 func parseConfig(viper *viper.Viper, data string) {
