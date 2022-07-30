@@ -1,77 +1,143 @@
 package utils
 
-//
-//import (
-//	"context"
-//	"encoding/json"
-//	"fmt"
-//	clientv3 "go.etcd.io/etcd/client/v3"
-//	"go.uber.org/zap"
-//	"os"
-//	"time"
-//)
-//
-//// service register
-//package internal
-//
-//import (
-//	"context"
-//	"encoding/json"
-//	"fmt"
-//	"github.com/Gentleelephant/account-srv/config"
-//	clientv3 "go.etcd.io/etcd/client/v3"
-//	"go.uber.org/zap"
-//	"os"
-//	"time"
-//)
-//
-//var (
-//	// 服务入口在 etcd 存储的 key 前缀
-//	serviceEndpointKeyPrefix = "/service_register"
-//	hostname                 string
-//	endpoint                 string
-//)
-//
-//var etcdConfig = clientv3.Config{
-//	Endpoints:            []string{"127.0.0.1:2379"},
-//	DialTimeout:          30 * time.Second,
-//	DialKeepAliveTimeout: 30 * time.Second,
-//}
-//
-//func ServiceRegister(ctx context.Context)  {
-//	hostname, _ = os.Hostname()
-//	cli, err := clientv3.New(etcdConfig)
-//	if err != nil {
-//		panic(err)
-//	}
-//	address := fmt.Sprintf("%s:%d", hostname, config.LocalConfig.GetInt(config.ServiceDynamicPort))
-//	key := fmt.Sprintf("%s/%s/%s", serviceEndpointKeyPrefix, ServiceName, address)
-//	zap.L().Debug("register service", zap.String("service", ServiceName), zap.String("address", address))
-//	// 过期时间: 3秒钟
-//	ttl := 3
-//	// 创建租约
-//	lease, err := cli.Grant(ctx, int64(ttl))
-//	if err != nil {
-//		Logger.Error(err.Error())
-//	}
-//	b, _ := json.Marshal(lease)
-//	zap.L().Info("grant lease success: ", zap.String("", string(b)))
-//	// put kv
-//	res, err := cli.Put(ctx, key, endpoint, clientv3.WithLease(lease.ID))
-//	if err != nil {
-//		zap.L().Error(err.Error())
-//	}
-//	b, _ = json.Marshal(res)
-//	zap.L().Info("put kv with lease success: ", zap.String("", string(b)))
-//	// 保持租约不过期
-//	klRes, err := cli.KeepAlive(ctx, lease.ID)
-//	if err != nil {
-//		panic(err)
-//	}
-//	// 监听续约情况
-//	for v := range klRes {
-//		b, _ = json.Marshal(v)
-//		zap.L().Info("keep lease alive success: ", zap.String("", string(b)))
-//	}
-//	zap.L().Info("keep lease alive end")
-//}
+import (
+	"github.com/nacos-group/nacos-sdk-go/clients"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/model"
+	"github.com/nacos-group/nacos-sdk-go/vo"
+)
+
+func getClientServerConfig(config NacosConfigparams) (constant.ClientConfig, []constant.ServerConfig) {
+	clientConfig := constant.ClientConfig{
+		NamespaceId:         config.NacosNamespace, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
+		TimeoutMs:           5000,
+		NotLoadCacheAtStart: true,
+		LogDir:              config.NacosLogDir,
+		CacheDir:            config.NacosCacheDir,
+		LogLevel:            config.NacosLogLevel,
+	}
+	// At least one ServerConfig
+	serverConfigs := []constant.ServerConfig{
+		{
+			IpAddr:      config.NacosHost,
+			ContextPath: "/nacos",
+			Port:        config.NacosPort,
+			Scheme:      "http",
+		},
+	}
+	return clientConfig, serverConfigs
+}
+
+// RegisterInstance 注册服务实例
+func RegisterInstance(config NacosConfigparams, params vo.RegisterInstanceParam) (bool, error) {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return false, err
+	}
+	success, err := namingClient.RegisterInstance(params)
+	if err != nil {
+		return false, err
+	}
+	return success, nil
+}
+
+// DeregisterInstance 取消注册服务实例
+func DeregisterInstance(config NacosConfigparams, params vo.DeregisterInstanceParam) (bool, error) {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return false, err
+	}
+	success, err := namingClient.DeregisterInstance(params)
+	if err != nil {
+		return false, err
+	}
+	return success, nil
+}
+
+// GetService GetService 获取服务实例
+func GetService(config NacosConfigparams, params vo.GetServiceParam) (model.Service, error) {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return model.Service{}, err
+	}
+	service, err := namingClient.GetService(params)
+	if err != nil {
+		return model.Service{}, err
+	}
+	return service, nil
+}
+
+// SelectAllInstances 获取所有服务实例
+func SelectAllInstances(config NacosConfigparams, params vo.SelectAllInstancesParam) ([]model.Instance, error) {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	services, err := namingClient.SelectAllInstances(params)
+	if err != nil {
+		return nil, err
+	}
+	return services, nil
+}
+
+// SelectServices 获取服务实例
+func SelectServices(config NacosConfigparams, params vo.SelectInstancesParam) ([]model.Instance, error) {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	services, err := namingClient.SelectInstances(params)
+	if err != nil {
+		return nil, err
+	}
+	return services, nil
+}
+
+// SelectOneHealthyInstance 获取一个健康的服务实例
+func SelectOneHealthyInstance(config NacosConfigparams, params vo.SelectOneHealthInstanceParam) (*model.Instance, error) {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return &model.Instance{}, err
+	}
+	instance, err := namingClient.SelectOneHealthyInstance(params)
+	if err != nil {
+		return &model.Instance{}, err
+	}
+	return instance, nil
+}
