@@ -59,8 +59,8 @@ func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 	// 解析配置
 	parseConfig(vl, remoteConfig)
 	err = client.ListenConfig(vo.ConfigParam{
-		DataId: vl.GetString(config.NacosDataId),
-		Group:  vl.GetString(config.NacosGroup),
+		DataId: config.NacosDataId,
+		Group:  config.NacosGroup,
 		OnChange: func(namespace, group, dataId, data string) {
 			// 刷新配置
 			parseConfig(vl, data)
