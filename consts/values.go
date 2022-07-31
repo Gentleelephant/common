@@ -7,14 +7,31 @@ const (
 
 // Nacos
 const (
-	NacosHost      = "nacos.host"
-	NacosPort      = "nacos.port"
-	NacosNamespace = "nacos.namespace"
-	NacosLogDir    = "nacos.logDir"
-	NacosCacheDir  = "nacos.cacheDir"
-	NacosGroup     = "nacos.group"
-	NacosDataId    = "nacos.dataId"
-	NacosLogLevel  = "nacos.logLevel"
+	NacosIpAddr = "nacos.IpAddr"
+	NacosPort   = "nacos.port"
+	NacosGroup  = "nacos.group"
+	NacosDataId = "nacos.dataId"
+
+	//  client config
+	NacosTimeoutMs            = "nacos.timeoutMs"
+	NacosBeatInterval         = "nacos.beatInterval"
+	NacosNamespaceId          = "nacos.namespaceId"
+	NacosAppName              = "nacos.appName"
+	NacosEndPoint             = "nacos.endPoint"
+	NacosRegionId             = "nacos.regionId"
+	NacosAccessKey            = "nacos.accessKey"
+	NacosSecretKey            = "nacos.secretKey"
+	NacosOpenKMS              = "nacos.openKMS"
+	NacosCacheDir             = "nacos.cacheDir"
+	NacosUpdateThreadNum      = "nacos.updateThreadNum"
+	NacosNotLoadCacheAtStart  = "nacos.notLoadCacheAtStart"
+	NacosUpdateCacheWhenEmpty = "nacos.updateCacheWhenEmpty"
+	NacosUsername             = "nacos.username"
+	NacosPassword             = "nacos.password"
+	NacosLogDir               = "nacos.logDir"
+	NacosLogLevel             = "nacos.logLevel"
+	NacosContextPath          = "nacos.contextPath"
+	NacosScheme               = "nacos.scheme"
 )
 
 // Sql

@@ -9,20 +9,20 @@ import (
 
 func getClientServerConfig(config NacosConfigparams) (constant.ClientConfig, []constant.ServerConfig) {
 	clientConfig := constant.ClientConfig{
-		NamespaceId:         config.NacosNamespace, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
+		NamespaceId:         config.NamespaceId, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
-		LogDir:              config.NacosLogDir,
-		CacheDir:            config.NacosCacheDir,
-		LogLevel:            config.NacosLogLevel,
+		LogDir:              config.LogDir,
+		CacheDir:            config.CacheDir,
+		LogLevel:            config.LogLevel,
 	}
 	// At least one ServerConfig
 	serverConfigs := []constant.ServerConfig{
 		{
-			IpAddr:      config.NacosHost,
-			ContextPath: "/nacos",
-			Port:        config.NacosPort,
-			Scheme:      "http",
+			IpAddr:      config.IpAddr,
+			ContextPath: config.ServerConfig.ContextPath,
+			Port:        config.Port,
+			Scheme:      config.Scheme,
 		},
 	}
 	return clientConfig, serverConfigs
@@ -140,4 +140,42 @@ func SelectOneHealthyInstance(config NacosConfigparams, params vo.SelectOneHealt
 		return &model.Instance{}, err
 	}
 	return instance, nil
+}
+
+// Subscribe 订阅服务
+func Subscribe(config NacosConfigparams, params *vo.SubscribeParam) error {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return nil
+	}
+	err = namingClient.Subscribe(params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Unsubscribe 取消订阅服务
+func Unsubscribe(config NacosConfigparams, params *vo.SubscribeParam) error {
+	clientConfig, serverConfigs := getClientServerConfig(config)
+	namingClient, err := clients.NewNamingClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return nil
+	}
+	err = namingClient.Unsubscribe(params)
+	if err != nil {
+		return err
+	}
+	return nil
 }

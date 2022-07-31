@@ -11,37 +11,54 @@ import (
 )
 
 type NacosConfigparams struct {
-	NacosNamespace   string `mapstructure:"nacos.namespace"`
-	NacosHost        string `mapstructure:"nacos.host"`
-	NacosLogDir      string `mapstructure:"nacos.logDir"`
-	NacosCacheDir    string `mapstructure:"nacos.cacheDir"`
-	NacosLogLevel    string `mapstructure:"nacos.logLevel"`
-	NacosPort        uint64 `mapstructure:"nacos.port"`
-	NacosDataId      string `mapstructure:"nacos.dataId"`
-	NacosGroup       string `mapstructure:"nacos.group"`
-	NacosContextPath string `mapstructure:"nacos.contextPath"`
-	NacosScheme      string `mapstructure:"nacos.scheme"`
-	NacosTimeout     uint64 `mapstructure:"nacos.timeout"`
+	//NacosNamespace    string `mapstructure:"nacos.namespace"`
+	//NacosHost         string `mapstructure:"nacos.host"`
+	//NacosLogDir       string `mapstructure:"nacos.logDir"`
+	//NacosCacheDir     string `mapstructure:"nacos.cacheDir"`
+	//NacosLogLevel     string `mapstructure:"nacos.logLevel"`
+	//NacosPort         uint64 `mapstructure:"nacos.port"`
+	DataId string `mapstructure:"nacos.dataId"`
+	Group  string `mapstructure:"nacos.group"`
+	//NacosContextPath  string `mapstructure:"nacos.contextPath"`
+	//NacosScheme       string `mapstructure:"nacos.scheme"`
+	//NacosTimeout      uint64 `mapstructure:"nacos.timeout"`
+	//NacosBeatInterval int64  `mapstructure:"nacos.beatInterval"`
+	constant.ClientConfig
+	constant.ServerConfig
 }
 
 // InitRemoteConfig 初始化远程配置
 func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 	vl := viper.New()
 	clientConfig := constant.ClientConfig{
-		NamespaceId:         config.NacosNamespace, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
-		TimeoutMs:           config.NacosTimeout,
-		NotLoadCacheAtStart: true,
-		LogDir:              config.NacosLogDir,
-		CacheDir:            config.NacosCacheDir,
-		LogLevel:            config.NacosLogLevel,
+		TimeoutMs:            config.TimeoutMs,
+		BeatInterval:         config.BeatInterval,
+		NamespaceId:          config.NamespaceId, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
+		AppName:              config.AppName,
+		Endpoint:             config.Endpoint,
+		RegionId:             config.RegionId,
+		AccessKey:            config.AccessKey,
+		SecretKey:            config.SecretKey,
+		OpenKMS:              config.OpenKMS,
+		CacheDir:             config.CacheDir,
+		UpdateThreadNum:      config.UpdateThreadNum,
+		NotLoadCacheAtStart:  config.NotLoadCacheAtStart,
+		UpdateCacheWhenEmpty: config.UpdateCacheWhenEmpty,
+		Username:             config.Username,
+		Password:             config.Password,
+		LogDir:               config.LogDir,
+		LogLevel:             config.LogLevel,
+		LogSampling:          config.LogSampling,
+		ContextPath:          config.ServerConfig.ContextPath,
+		LogRollingConfig:     config.LogRollingConfig,
 	}
 	// At least one ServerConfig
 	serverConfigs := []constant.ServerConfig{
 		{
-			IpAddr:      config.NacosHost,
-			ContextPath: config.NacosContextPath,
-			Port:        config.NacosPort,
-			Scheme:      config.NacosScheme,
+			IpAddr:      config.IpAddr,
+			ContextPath: config.ServerConfig.ContextPath,
+			Port:        config.Port,
+			Scheme:      config.Scheme,
 		},
 	}
 	client, err := clients.NewConfigClient(vo.NacosClientParam{
@@ -53,8 +70,8 @@ func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 	}
 	// 获取配置
 	remoteConfig, err := client.GetConfig(vo.ConfigParam{
-		DataId: config.NacosDataId,
-		Group:  config.NacosGroup,
+		DataId: config.DataId,
+		Group:  config.Group,
 	})
 	if err != nil {
 		return nil, err
@@ -62,8 +79,8 @@ func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 	// 解析配置
 	parseConfig(vl, remoteConfig)
 	err = client.ListenConfig(vo.ConfigParam{
-		DataId: config.NacosDataId,
-		Group:  config.NacosGroup,
+		DataId: config.DataId,
+		Group:  config.Group,
 		OnChange: func(namespace, group, dataId, data string) {
 			// 刷新配置
 			parseConfig(vl, data)
