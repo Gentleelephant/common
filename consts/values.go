@@ -50,3 +50,21 @@ const (
 	RedisPassword = "redis.password"
 	RedisDB       = "redis.db"
 )
+
+const (
+	LoggerMessageKey        = "logger.messageKey"
+	LoggerLevelKey          = "logger.levelKey"
+	LoggerTimeKey           = "logger.timeKey"
+	LoggerCallerKey         = "logger.callerKey"
+	LoggerNameKey           = "logger.nameKey"
+	LoggerFunctionKey       = "logger.functionKey"
+	LoggerStacktraceKey     = "logger.stacktraceKey"
+	LoggerLineEnding        = "logger.lineEnding"
+	LoggerConsoleSeparator  = "logger.consoleSeparator"
+	LoggerEncoding          = "logger.encoding" //json or console
+	LoggerDevelopmentMode   = "logger.developmentMode"
+	LoggerDisableCaller     = "logger.disableCaller"
+	LoggerDisableStacktrace = "logger.disableStacktrace"
+	LoggerOutputPath        = "logger.outputPath"
+	LoggerErrorOutputPath   = "logger.errorOutputPath"
+)
