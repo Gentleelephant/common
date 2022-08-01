@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+type Callback func(namespace, group, dataId, data string)
+
 type NacosConfigparams struct {
 	//NacosNamespace    string `mapstructure:"nacos.namespace"`
 	//NacosHost         string `mapstructure:"nacos.host"`
@@ -28,7 +30,7 @@ type NacosConfigparams struct {
 }
 
 // InitRemoteConfig 初始化远程配置
-func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
+func InitRemoteConfig(config NacosConfigparams, callback Callback) (*viper.Viper, error) {
 	vl := viper.New()
 	clientConfig := constant.ClientConfig{
 		TimeoutMs:            config.TimeoutMs,
@@ -84,6 +86,8 @@ func InitRemoteConfig(config NacosConfigparams) (*viper.Viper, error) {
 		OnChange: func(namespace, group, dataId, data string) {
 			// 刷新配置
 			parseConfig(vl, data)
+			// 回调函数
+			callback(namespace, group, dataId, data)
 		},
 	})
 	if err != nil {
