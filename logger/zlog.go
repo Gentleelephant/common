@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
+	"os"
 	"time"
 )
 
@@ -62,12 +63,13 @@ func GetDefaultLogger(v *viper.Viper) *zap.Logger {
 	writeSyncer := GetWriteSyncer(v)
 	core := zapcore.NewTee(
 		zapcore.NewCore(encoder, writeSyncer, getDefaultLevel(v)),
+		zapcore.NewCore(zapcore.NewConsoleEncoder(*getDefaultEncoderConfig(v)), zapcore.AddSync(os.Stdout), getDefaultLevel(v)),
 	)
 	logger := zap.New(core, zap.AddCaller())
 	return logger
 }
 
-// GetDefaultEncoder 输出日志到控制台
+// GetDefaultEncoder 自定义日志格式显示
 func GetDefaultEncoder(v *viper.Viper) zapcore.Encoder {
 	encoding := v.GetString(consts.LoggerEncoding)
 	if encoding == "" || encoding == "json" {
