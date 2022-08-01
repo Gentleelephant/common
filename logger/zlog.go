@@ -79,7 +79,7 @@ func GetDefaultEncoder(v *viper.Viper) zapcore.Encoder {
 // GetWriteSyncer 自定义的WriteSyncer
 func GetWriteSyncer(v *viper.Viper) zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   viper.GetString(consts.LoggerOutputPath),
+		Filename:   v.GetString(consts.LoggerOutputPath),
 		MaxSize:    100,
 		MaxBackups: 10,
 		MaxAge:     30,
