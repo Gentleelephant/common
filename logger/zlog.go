@@ -28,7 +28,7 @@ func getDefaultEncoderConfig(v *viper.Viper) *zapcore.EncoderConfig {
 		EncodeDuration:   getDefaultEncodeDuration(),
 		EncodeCaller:     cEncodeCaller,
 		EncodeName:       getDefaultEncodeName(),
-		ConsoleSeparator: viper.GetString(consts.LoggerConsoleSeparator),
+		ConsoleSeparator: viper.GetString(consts.LoggerSeparator),
 	}
 	return encoderConfig
 }

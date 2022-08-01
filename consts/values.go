@@ -60,7 +60,7 @@ const (
 	LoggerFunctionKey       = "logger.functionKey"
 	LoggerStacktraceKey     = "logger.stacktraceKey"
 	LoggerLineEnding        = "logger.lineEnding"
-	LoggerConsoleSeparator  = "logger.consoleSeparator"
+	LoggerSeparator         = "logger.separator"
 	LoggerEncoding          = "logger.encoding" //json or console
 	LoggerDevelopmentMode   = "logger.developmentMode"
 	LoggerDisableCaller     = "logger.disableCaller"
