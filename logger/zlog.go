@@ -61,7 +61,7 @@ func GetDefaultLogger(v *viper.Viper) *zap.Logger {
 	encoder := GetDefaultEncoder(v)
 	writeSyncer := GetWriteSyncer(v)
 	core := zapcore.NewTee(
-		zapcore.NewCore(encoder, writeSyncer, zap.DebugLevel),
+		zapcore.NewCore(encoder, writeSyncer, getDefaultLevel(v)),
 	)
 	logger := zap.New(core, zap.AddCaller())
 	return logger
@@ -78,11 +78,23 @@ func GetDefaultEncoder(v *viper.Viper) zapcore.Encoder {
 
 // GetWriteSyncer 自定义的WriteSyncer
 func GetWriteSyncer(v *viper.Viper) zapcore.WriteSyncer {
+	maxSize := v.GetInt(consts.LoggerMaxSize)
+	if maxSize == 0 {
+		maxSize = 100
+	}
+	maxBackups := v.GetInt(consts.LoggerMaxBackups)
+	if maxBackups == 0 {
+		maxBackups = 5
+	}
+	maxAge := v.GetInt(consts.LoggerMaxAge)
+	if maxAge == 0 {
+		maxAge = 1
+	}
 	lumberJackLogger := &lumberjack.Logger{
 		Filename:   v.GetString(consts.LoggerOutputPath),
-		MaxSize:    100,
-		MaxBackups: 10,
-		MaxAge:     30,
+		MaxSize:    maxSize,
+		MaxBackups: maxBackups,
+		MaxAge:     maxAge,
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }
@@ -112,4 +124,26 @@ func getDefaultEncodeName() zapcore.NameEncoder {
 
 func getDefaultSampling() *zap.SamplingConfig {
 	return nil
+}
+
+func getDefaultLevel(v *viper.Viper) zapcore.Level {
+	level := v.GetString(consts.LoggerLevel)
+	switch level {
+	case "debug":
+		return zapcore.DebugLevel
+	case "info":
+		return zapcore.InfoLevel
+	case "warn":
+		return zapcore.WarnLevel
+	case "error":
+		return zapcore.ErrorLevel
+	case "dpanic":
+		return zapcore.DPanicLevel
+	case "panic":
+		return zapcore.PanicLevel
+	case "fatal":
+		return zapcore.FatalLevel
+	default:
+		return zapcore.DebugLevel
+	}
 }

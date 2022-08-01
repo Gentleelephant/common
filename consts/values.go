@@ -67,4 +67,8 @@ const (
 	LoggerDisableStacktrace = "logger.disableStacktrace"
 	LoggerOutputPath        = "logger.outputPath"
 	LoggerErrorOutputPath   = "logger.errorOutputPath"
+	LoggerMaxSize           = "logger.maxSize"
+	LoggerMaxAge            = "logger.maxAge"
+	LoggerMaxBackups        = "logger.maxBackups"
+	LoggerLevel             = "logger.level"
 )
