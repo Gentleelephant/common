@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type Callback func(namespace, group, dataId, data string)
+type Callback func(namespace, group, dataId, data string, v *viper.Viper)
 
 type NacosConfigparams struct {
 	//NacosNamespace    string `mapstructure:"nacos.namespace"`
@@ -30,8 +30,8 @@ type NacosConfigparams struct {
 }
 
 // InitRemoteConfig 初始化远程配置
-func InitRemoteConfig(config NacosConfigparams, callback Callback) (*viper.Viper, error) {
-	vl := viper.New()
+func InitRemoteConfig(config NacosConfigparams, vl *viper.Viper, callback Callback) error {
+	//vl := viper.New()
 	clientConfig := constant.ClientConfig{
 		TimeoutMs:            config.TimeoutMs,
 		BeatInterval:         config.BeatInterval,
@@ -68,7 +68,7 @@ func InitRemoteConfig(config NacosConfigparams, callback Callback) (*viper.Viper
 		ServerConfigs: serverConfigs,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// 获取配置
 	remoteConfig, err := client.GetConfig(vo.ConfigParam{
@@ -76,7 +76,7 @@ func InitRemoteConfig(config NacosConfigparams, callback Callback) (*viper.Viper
 		Group:  config.Group,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// 解析配置
 	parseConfig(vl, remoteConfig)
@@ -87,14 +87,14 @@ func InitRemoteConfig(config NacosConfigparams, callback Callback) (*viper.Viper
 			// 刷新配置
 			parseConfig(vl, data)
 			// 回调函数
-			callback(namespace, group, dataId, data)
+			callback(namespace, group, dataId, data, vl)
 		},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	fmt.Println(remoteConfig)
-	return vl, nil
+	return nil
 }
 
 func parseConfig(viper *viper.Viper, data string) {
